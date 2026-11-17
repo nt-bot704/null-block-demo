@@ -51,13 +51,25 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
   background: rgba(7, 8, 10, 0.78);
   line-height: 1.4;
   text-align: center;
 }
 
 .overlay.hidden { display: none; }
+
+/* 글자 뒤 어두운 상자: 쌓인 블록 색이 비쳐도 글자가 묻히지 않게 */
+.overlay-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100% - 24px);
+  padding: 18px 24px;
+  background: rgba(7, 8, 10, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
 
 .overlay p { margin: 0; }
 
