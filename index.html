@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NULL BLOCK</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="game">
+    <div class="board-wrap">
+      <canvas id="board" aria-label="NULL BLOCK 게임 보드"></canvas>
+      <div id="overlay" class="overlay">
+        <p class="overlay-title">NULL BLOCK</p>
+        <p class="overlay-sub">Enter 키로 시작</p>
+      </div>
+    </div>
+
+    <aside class="side">
+      <h1>NULL<br>BLOCK</h1>
+
+      <!-- 기능 파일(플러그인)이 UI를 붙이는 자리: NullBlock.hud -->
+      <section id="hud" class="hud"></section>
+
+      <section class="keys">
+        <h2>조작</h2>
+        <dl>
+          <dt>← →</dt><dd>이동</dd>
+          <dt>↑</dt><dd>회전</dd>
+          <dt>↓</dt><dd>한 칸 내리기</dd>
+          <dt>Space</dt><dd>바로 떨어뜨리기</dd>
+          <dt>P</dt><dd>일시정지</dd>
+          <dt>Enter</dt><dd>시작 / 다시 시작</dd>
+        </dl>
+      </section>
+    </aside>
+  </main>
+
+  <script src="game.js"></script>
+  <!-- 기능은 game.js 아래에 파일 하나씩 붙이면 됩니다. 예:
+  <script src="plugins/score.js"></script>
+  -->
+</body>
+</html>
