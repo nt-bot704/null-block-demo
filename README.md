@@ -17,6 +17,7 @@
 
 ```html
 <script src="game.js"></script>
+<script src="plugins/next-preview.js"></script>
 <script src="plugins/score.js"></script>
 ```
 
@@ -36,7 +37,7 @@
 | 이벤트 | detail | 시점 |
 | --- | --- | --- |
 | `start` | `{}` | 새 게임 시작 |
-| `spawn` | `{ piece }` | 새 블록 등장 |
+| `spawn` | `{ piece, next }` | 새 블록 등장 (`next`: 다음 블록 종류 배열, 가까운 순 — 예: `['T', 'S', 'Z']`) |
 | `move` | `{ dx, dy, source, piece }` | 이동 (`source`: `'player'` / `'gravity'`) |
 | `rotate` | `{ kick, piece }` | 회전 |
 | `drop` | `{ distance, piece }` | Space로 바로 떨어뜨림 |
@@ -48,4 +49,4 @@
 
 리스너는 `(detail, game)`을 받고, `on()`은 구독 해제 함수를 돌려줍니다. 리스너에서 오류가 나도 게임은 멈추지 않고 콘솔에 기록만 남습니다.
 
-그 밖에 `NullBlock`에서 쓸 수 있는 것: `status`, `getBoard()`, `getPiece()`, `collides(matrix, x, y)`, `drawCell(x, y, color, alpha)`, `config.dropInterval`(낙하 간격 ms, 바꿀 수 있음), `hud`, `showOverlay(title, sub)`, `hideOverlay()`, `start()`, `togglePause()`.
+그 밖에 `NullBlock`에서 쓸 수 있는 것: `status`, `getBoard()`, `getPiece()`, `getNext()`(다음 블록 종류 배열, `NEXT_COUNT`개, 게임 시작 전엔 `[]`), `SHAPES`·`COLORS`(블록 모양·색, 읽기 전용), `collides(matrix, x, y)`, `drawCell(x, y, color, alpha)`, `config.dropInterval`(낙하 간격 ms, 바꿀 수 있음), `hud`, `showOverlay(title, sub)`, `hideOverlay()`, `start()`, `togglePause()`.

@@ -6,7 +6,7 @@
  *
  * 이벤트 (detail 내용)
  *   start     {}                                  새 게임 시작
- *   spawn     { piece }                           새 블록 등장
+ *   spawn     { piece, next }                     새 블록 등장 (next: 다음 블록 종류 배열, 가까운 순)
  *   move      { dx, dy, source, piece }           블록 이동 (source: 'player' | 'gravity')
  *   rotate    { kick, piece }                     블록 회전
  *   drop      { distance, piece }                 Space로 바로 떨어뜨림 (lock 직전)
@@ -17,6 +17,9 @@
  *   draw      { ctx, cellSize, cols, rows }       매 프레임 보드를 그린 직후 (덧그리기용)
  *
  * piece = { type, x, y, matrix, cells: [{x, y}, ...] }  (복사본이라 고쳐도 게임엔 영향 없음)
+ *
+ * 다음 블록: NullBlock.getNext() → ['T', 'S', 'Z'] 처럼 종류 배열 (NEXT_COUNT개, 복사본)
+ *   블록 모양은 NullBlock.SHAPES[type], 색은 NullBlock.COLORS[type] (둘 다 읽기 전용)
  */
 (() => {
   'use strict';
@@ -24,6 +27,7 @@
   const COLS = 10;
   const ROWS = 20;
   const CELL = 30;
+  const NEXT_COUNT = 3; // 미리 뽑아 두는 다음 블록 수
 
   const SHAPES = {
     I: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
@@ -35,6 +39,13 @@
     L: [[0, 0, 1], [1, 1, 1], [0, 0, 0]],
   };
 
+  // 플러그인에 그대로 공개하므로 얼려 둠 (spawn은 복사해서 씀)
+  for (const m of Object.values(SHAPES)) {
+    m.forEach(Object.freeze);
+    Object.freeze(m);
+  }
+  Object.freeze(SHAPES);
+
   const COLORS = {
     I: '#4fd1c5',
     O: '#f6e05e',
@@ -44,6 +55,7 @@
     J: '#63b3ed',
     L: '#f6ad55',
   };
+  Object.freeze(COLORS);
 
   // 플러그인이 바꿔도 되는 값 (예: 레벨 기능이 dropInterval을 줄임)
   const config = {
@@ -90,6 +102,7 @@
   let board = emptyBoard();
   let piece = null;
   let bag = [];
+  let queue = []; // 다음에 나올 블록 종류 (앞이 바로 다음)
   let status = 'ready'; // 'ready' | 'playing' | 'paused' | 'over'
   let dropAcc = 0;
   let lastTime = 0;
@@ -99,7 +112,7 @@
   }
 
   // 7종을 한 번씩 섞어서 꺼냄 (같은 블록만 계속 나오는 것 방지)
-  function nextType() {
+  function takeFromBag() {
     if (bag.length === 0) {
       bag = Object.keys(SHAPES);
       for (let i = bag.length - 1; i > 0; i--) {
@@ -108,6 +121,12 @@
       }
     }
     return bag.pop();
+  }
+
+  // 큐 맨 앞을 꺼내고, 뒤에는 항상 NEXT_COUNT개가 남도록 채움
+  function nextType() {
+    while (queue.length <= NEXT_COUNT) queue.push(takeFromBag());
+    return queue.shift();
   }
 
   function cellsOf(matrix, px, py) {
@@ -158,7 +177,7 @@
       gameOver(); // 나올 자리가 막힘 = 꼭대기에 닿음
       return;
     }
-    emit('spawn', { piece: pieceInfo() });
+    emit('spawn', { piece: pieceInfo(), next: queue.slice() });
   }
 
   function move(dx, dy, source) {
@@ -229,6 +248,7 @@
   function start() {
     board = emptyBoard();
     bag = [];
+    queue = [];
     piece = null;
     status = 'playing';
     hideOverlay();
@@ -355,6 +375,8 @@
     COLS,
     ROWS,
     COLORS,
+    SHAPES,
+    NEXT_COUNT,
     config,
     on,
     off,
@@ -363,6 +385,7 @@
     },
     getBoard: () => board.map((row) => row.slice()),
     getPiece: () => (piece ? pieceInfo() : null),
+    getNext: () => queue.slice(), // 다음 블록 종류들 (게임 시작 전엔 빈 배열)
     collides: (matrix, x, y) => collides(matrix, x, y),
     drawCell,
     hud, // 기능 파일이 점수판 같은 UI를 붙일 곳
